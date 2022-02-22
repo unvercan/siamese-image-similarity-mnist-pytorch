@@ -1,5 +1,6 @@
 future==0.18.2
-numpy==1.19.2
-Pillow==7.2.0
-torch==1.6.0+cpu
-torchvision==0.7.0+cpu
+numpy==1.22.2
+Pillow==9.0.1
+torch==1.10.2
+torchaudio==0.10.2
+torchvision==0.11.3

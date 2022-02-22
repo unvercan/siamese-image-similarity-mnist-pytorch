@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 import random
 from abc import ABC
 from argparse import ArgumentParser
@@ -46,7 +47,7 @@ def train_siamese_epoch(model, criterion, device, loader, optimizer,
     model.train()
     epoch_info = dict()
     epoch_info['samples'] = len(loader.dataset)
-    batch_infos = []
+    batch_info_list = []
     processed_samples = 0
     for batch_index, batch in enumerate(iterable=loader):
         batch_inputs, batch_target = batch
@@ -54,7 +55,7 @@ def train_siamese_epoch(model, criterion, device, loader, optimizer,
         batch_info = train_siamese_batch(batch_inputs=batch_inputs, batch_target=batch_target,
                                          model=model, criterion=criterion, device=device,
                                          optimizer=optimizer, make_prediction=make_prediction)
-        batch_infos.append(batch_info)
+        batch_info_list.append(batch_info)
         processed_samples += batch_info['size']
         if show_batch_info:
             print('Batch: [{batch_no}/{number_of_batches}], '
@@ -63,10 +64,10 @@ def train_siamese_epoch(model, criterion, device, loader, optimizer,
                   .format(batch_no=(batch_index + 1), number_of_batches=number_of_batches,
                           processed_samples=processed_samples, samples=epoch_info['samples'],
                           batch_loss=batch_info['loss']))
-    epoch_info['batches'] = batch_infos
-    epoch_info['loss'] = sum(batch_info['loss'] for batch_info in batch_infos) / epoch_info['samples']
+    epoch_info['batches'] = batch_info_list
+    epoch_info['loss'] = sum(batch_info['loss'] for batch_info in batch_info_list) / epoch_info['samples']
     if make_prediction:
-        epoch_info['correct'] = sum(batch_info['correct'] for batch_info in batch_infos)
+        epoch_info['correct'] = sum(batch_info['correct'] for batch_info in batch_info_list)
         epoch_info['accuracy'] = 100.0 * (epoch_info['correct'] / epoch_info['samples'])
     if show_epoch_info:
         print('Epoch: Samples={epoch_samples}, Loss={epoch_loss:.8f}'
@@ -159,18 +160,22 @@ class SiameseCNN(Module, ABC):
         super(SiameseCNN, self).__init__()
         self.feature_extraction = Sequential(
             OrderedDict([
-                ('conv_1', Conv2d(in_channels=1, out_channels=16, stride=1, kernel_size=3, padding=0)),  # 16x26x26
+                ('conv_1', Conv2d(in_channels=1, out_channels=16, stride=(1, 1), kernel_size=(3, 3), padding=0)),
+                # 16x26x26
                 ('bn_1', BatchNorm2d(num_features=16)),
                 ('relu_1', ReLU(inplace=False)),
-                ('conv_2', Conv2d(in_channels=16, out_channels=32, stride=1, kernel_size=3, padding=0)),  # 32x24x24
+                ('conv_2', Conv2d(in_channels=16, out_channels=32, stride=(1, 1), kernel_size=(3, 3), padding=0)),
+                # 32x24x24
                 ('bn_2', BatchNorm2d(num_features=32)),
                 ('relu_2', ReLU(inplace=False)),
                 ('pool_1', MaxPool2d(stride=2, kernel_size=2, padding=0)),  # 32x12x12
                 ('drop_1', Dropout(p=0.1)),
-                ('conv_3', Conv2d(in_channels=32, out_channels=64, stride=1, kernel_size=3, padding=0)),  # 64x10x10
+                ('conv_3', Conv2d(in_channels=32, out_channels=64, stride=(1, 1), kernel_size=(3, 3), padding=0)),
+                # 64x10x10
                 ('bn_3', BatchNorm2d(num_features=64)),
                 ('relu_3', ReLU(inplace=False)),
-                ('conv_4', Conv2d(in_channels=64, out_channels=128, stride=1, kernel_size=3, padding=0)),  # 128x8x8
+                ('conv_4', Conv2d(in_channels=64, out_channels=128, stride=(1, 1), kernel_size=(3, 3), padding=0)),
+                # 128x8x8
                 ('bn_4', BatchNorm2d(num_features=128)),
                 ('relu_4', ReLU(inplace=False)),
                 ('pool_2', MaxPool2d(stride=2, kernel_size=2, padding=0)),  # 128x4x4

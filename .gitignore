@@ -1,3 +1,5 @@
 /.idea/
 /dataset/MNIST/
 /mnist-siamese-similarity-pytorch.iml
+/train/
+/weight/
